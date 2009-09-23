@@ -17,6 +17,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "Gearbox.h"
+#import <sqlite3.h>
 
 @protocol ShiftDbo;
 
@@ -25,11 +26,17 @@
 	
 	IBOutlet NSTextField *name;
 	IBOutlet NSTextField *file;
+	NSString *filePath;
 
 	IBOutlet NSImageView *nameWarning;
 	IBOutlet NSImageView *fileWarning;
 	
 	IBOutlet NSView *saveAccessory;
+	
+@protected
+	sqlite3 *database;
+	BOOL connected;
+	NSDictionary *favorite;
 }
 
 - (IBAction) selectFile:(id)sender;

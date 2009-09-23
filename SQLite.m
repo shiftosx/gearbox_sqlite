@@ -16,10 +16,17 @@
  */
 
 #import "SQLite.h"
-#import <sqlite3.h>
 
 
 @implementation SQLite
+
+- (void) dealloc
+{
+	if (filePath)
+		[filePath release];
+	[super dealloc];
+}
+
 
 + (NSString *) gbTitle{
 	return @"SQLite";
@@ -33,10 +40,12 @@
 	return editor;
 }
 
-- (void) gbLoadFavoriteIntoEditor:(NSDictionary *)favorite
+- (void) gbLoadFavoriteIntoEditor:(NSDictionary *)userFavorite
 {
-	NSString *nameString = ([favorite objectForKey:@"name"]) ? [favorite objectForKey:@"name"] : @""; 
-	NSString *fileString = ([favorite objectForKey:@"file"]) ? [favorite objectForKey:@"file"] : @""; 
+	filePath = ([userFavorite objectForKey:@"file"]) ? [userFavorite objectForKey:@"file"] : @"";
+	[filePath retain];
+	NSString *nameString = ([userFavorite objectForKey:@"name"]) ? [userFavorite objectForKey:@"name"] : @""; 
+	NSString *fileString = [filePath lastPathComponent];
 
 	[name setObjectValue:nameString];
 	[file setObjectValue:fileString];
@@ -44,21 +53,19 @@
 
 - (NSDictionary *) gbEditorAsDictionary
 {
-	NSMutableDictionary *favorite = [[NSMutableDictionary alloc] init];
+	NSMutableDictionary *userFavorite = [[NSMutableDictionary alloc] init];
 	
 	// Validate requirements
 	// Would be nice to add in a check for valid connection and pop up a notice if it fails, a'la apple mail
-	[nameWarning setHidden:![[name stringValue] isEqualToString:@""]];
-//	[fileWarning setHidden:![[file stringValue] isEqualToString:@""]];
+	[fileWarning setHidden:![[file stringValue] isEqualToString:@""]];
 	
-	if ([[name stringValue] isEqualToString:@""]/* || [[file stringValue] isEqualToString:@""]*/){
+	if ([[file stringValue] isEqualToString:@""]){
 		return nil;
 	}
+	[userFavorite setObject:[name stringValue] forKey:@"name"];
+	[userFavorite setObject:filePath forKey:@"file"];	
 	
-	[favorite setObject:[name stringValue] forKey:@"name"];
-//	[favorite setObject:[file stringValue] forKey:@"file"];	
-	
-	return favorite;
+	return userFavorite;
 }
 
 - (NSView *) gbAdvanced
@@ -69,8 +76,8 @@
 - (IBAction) selectFile:(id)sender
 {
 	int result;
-//    NSOpenPanel *filePanel = [NSOpenPanel openPanel];
-	NSSavePanel *filePanel = [NSSavePanel savePanel];
+    NSOpenPanel *filePanel = [NSOpenPanel openPanel];
+//	NSSavePanel *filePanel = [NSSavePanel savePanel];
 
 	
 //	NSMutableArray*      topLevelObjs = [NSMutableArray array];
@@ -88,30 +95,115 @@
 	[filePanel setNameFieldLabel:@"Database"];
 	[filePanel setDelegate:self];
 	
-	[filePanel setAllowedFileTypes:[NSArray arrayWithObjects:@"mp3",@"zip",nil]];
+	[filePanel setAllowedFileTypes:[NSArray arrayWithObjects:@"sqlite",@"sqlite3",@"db",nil]];
 //	[filePanel setAllowsOtherFileTypes:YES];
-//	[savePanel setRequiredFileType:nil];
-//	[savePanel setExtensionHidden:NO];
+	[filePanel setExtensionHidden:NO];
+	[filePanel setResolvesAliases:NO];
     result = [filePanel runModal];
     if (result == NSOKButton) {
-		[file setStringValue:[[filePanel filename] lastPathComponent]];
+		filePath = [[[filePanel URL] path] retain];
+		[file setStringValue:[filePath lastPathComponent]];
     }
 }
 
-- (NSString *)panel:(id)sender userEnteredFilename:(NSString *)filename confirmed:(BOOL)okFlag
+//database querying functions
+- (void) selectSchema:(NSString *)schema
 {
-	NSString *path = [[sender directory] stringByAppendingPathComponent:filename];
-	if ([[NSFileManager defaultManager] fileExistsAtPath:path])
-		return [filename stringByAppendingPathExtension:@"shiftTemporaryOverride"];
-	else
-		return filename;
 }
 
-- (BOOL)panel:(id)sender isValidFilename:(NSString *)filename
+- (NSArray *) listSchemas:(NSString *)filter
 {
-//	if ([[NSFileManager defaultManager] fileExistsAtPath:filename])
-	NSLog(@"valid? %@",filename);
-	return YES;
+	return [NSArray arrayWithObject:[[favorite objectForKey:@"file"] lastPathComponent]];
+}
+
+- (NSArray *) listTables:(NSString *)filter
+{
+	NSMutableArray *tables = [NSMutableArray array];
+	NSArray *tableArray = [self query:@"SELECT `name` FROM SQLITE_MASTER WHERE `type`='table';"];
+	for (NSDictionary *table in tableArray){
+		[tables addObject:[table objectForKey:@"name"]];
+	}
+	
+	return [NSArray arrayWithArray:tables];
+}
+
+- (NSArray *) query:(NSString *)query
+{	
+	if (!connected) {
+		return [NSArray array];
+	}
+	
+	NSMutableArray *results = [NSMutableArray array];
+	sqlite3_stmt *statement;
+	
+	if (sqlite3_prepare_v2(database, [query UTF8String], -1, &statement, NULL) == SQLITE_OK) {
+		while (sqlite3_step(statement) == SQLITE_ROW) {
+			NSMutableDictionary *row = [NSMutableDictionary dictionary];
+			for (int i=0; i<sqlite3_column_count(statement); i++) {
+				id value;
+				switch (sqlite3_column_type(statement, i)) {
+					case SQLITE_INTEGER:
+						value = [NSNumber numberWithInt:sqlite3_column_int(statement, i)];
+						break;
+					case SQLITE_FLOAT:
+						value = [NSNumber numberWithDouble:sqlite3_column_double(statement, i)];
+						break;
+					case SQLITE_TEXT:
+						value = [NSString stringWithUTF8String:(char *)sqlite3_column_text(statement, i)];
+						break;
+					case SQLITE_BLOB:
+					{
+						const void *data = sqlite3_column_blob(statement, i);
+						value = [NSData dataWithBytes:data length:sizeof data];//not sure if this is the correct way to get the length
+						break;
+					}
+					case SQLITE_NULL:
+					default:
+						value = nil;
+						break;
+				}
+				[row setObject:value forKey:[NSString stringWithUTF8String:sqlite3_column_name(statement, i)]];
+			}
+			[results addObject:row];
+		}
+	}else {
+		//exception
+		@throw [NSException exceptionWithName:GBInvalidQuery 
+									   reason:[self lastErrorMessage] 
+									 userInfo:[NSDictionary dictionaryWithObject:query forKey:@"query"]];
+	}
+
+	sqlite3_finalize(statement); //release statement
+	return [NSArray arrayWithArray:results];
+}
+
+- (NSString *) lastErrorMessage
+{
+	return [NSString stringWithFormat:@"%s",  sqlite3_errmsg(database)];
+}
+
+//connection functions
+- (BOOL) isConnected
+{
+	return connected;
+}
+
+- (BOOL) connect:(NSDictionary *)userFavorite
+{
+	favorite = userFavorite;
+	connected = (sqlite3_open([[favorite objectForKey:@"file"] UTF8String], &database) == SQLITE_OK);
+	return connected;
+}
+
+- (void) disconnect
+{
+	// this won't work until we upgrade to libsqlite 3.5.9
+//	sqlite3_stmt *pStmt;
+//	while( (pStmt = sqlite3_next_stmt(database, 0))!=0 ){
+//		sqlite3_finalize(pStmt);
+//	}
+	sqlite3_close(database);
+	connected = NO;
 }
 
 @end
