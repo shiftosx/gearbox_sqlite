@@ -17,6 +17,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "Gearbox.h"
+#import "mysql/include/mysql.h"
 
 @protocol ShiftDbo;
 
@@ -34,7 +35,14 @@
 	IBOutlet NSImageView *nameWarning;
 	IBOutlet NSImageView *hostWarning;
 	IBOutlet NSImageView *userWarning;
-	
+
+@protected
+	MYSQL               connection;
+    BOOL                connected;
+    NSStringEncoding    encoding;
+    unsigned int        connectionFlags;
 }
+
+- (NSArray *) stringArrayFromResult:(MYSQL_RES *)result;
 
 @end

@@ -29,4 +29,16 @@
 //advanced editor functions
 - (NSView *) gbAdvanced;
 
+//database querying functions
+- (void) selectSchema:(NSString *)schema;
+- (NSArray *) listSchemas:(NSString *)filter;
+- (NSArray *) listTables:(NSString *)filter;
+- (NSArray *) query:(NSString *)query;
+- (NSString *) lastErrorMessage;
+
+//connection functions
+- (BOOL) isConnected;
+- (BOOL) connect:(NSDictionary *)favorite;
+- (void) disconnect;
+
 @end

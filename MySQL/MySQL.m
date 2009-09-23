@@ -17,7 +17,6 @@
 
 #import "MySQL.h"
 
-
 @implementation MySQL
 
 + (NSString *) gbTitle{
@@ -82,5 +81,102 @@
 - (NSView *) gbAdvanced
 {
 	return [[NSView alloc] init];
+}
+
+- (BOOL) isConnected
+{
+	return connected;
+}
+
+//connection functions
+- (BOOL) connect:(NSDictionary *)favorite
+{	
+	mysql_init(&connection);
+	connected = NO;
+	mysql_options(&connection,MYSQL_READ_DEFAULT_GROUP,"shift");
+	if (mysql_real_connect(&connection,
+							[[favorite objectForKey:@"host"] UTF8String],
+							[[favorite objectForKey:@"user"] UTF8String],
+							[[favorite objectForKey:@"password"] UTF8String],
+							[[favorite objectForKey:@"database"] UTF8String],0,NULL,0))
+	{
+		connected = YES;
+	}else {
+		NSLog(@"MySQL: Failed to connected. Error:%s\n", mysql_error(&connection));
+	}
+
+	return connected;
+}
+
+- (void) disconnect
+{
+	if (connected)
+		mysql_close(&connection);
+	connected = NO;
+}
+
+- (void) selectSchema:(NSString *)schema
+{
+	if (connected) {
+		mysql_select_db(&connection, [schema UTF8String]);
+	}
+}
+
+- (NSArray *) listSchemas:(NSString *)filter
+{
+	if (!connected)
+		return [NSArray array];
+
+
+	MYSQL_RES *result = mysql_list_dbs(&connection, [filter UTF8String]);
+	NSArray *schemas = [self stringArrayFromResult:result];
+	
+	mysql_free_result(result);
+	
+	return schemas;
+}
+
+- (NSArray *) listTables:(NSString *)filter
+{
+	if (!connected)
+		return [NSArray array];
+	
+	
+	MYSQL_RES *result = mysql_list_tables(&connection, [filter UTF8String]);
+	NSArray *tables = [self stringArrayFromResult:result];
+
+	mysql_free_result(result);
+	
+	return tables;
+	
+}
+
+- (NSArray *) query:(NSString *)query
+{
+	return [NSArray array];
+}
+
+- (NSString *) lastErrorMessage
+{
+	return [NSString stringWithFormat:@"%s", mysql_error(&connection)];
+}
+
+
+//local helper methods
+- (NSArray *) stringArrayFromResult:(MYSQL_RES *)result
+{
+	NSMutableArray *array = [NSMutableArray array];
+	
+	MYSQL_ROW row;
+	
+	while ((row = mysql_fetch_row(result)))
+	{
+		unsigned long *lengths;
+		lengths = mysql_fetch_lengths(result);
+		[array addObject:[NSString stringWithFormat:@"%.*s", (int) lengths[0], row[0]]];
+	}
+		
+	return [NSArray arrayWithArray:array];
+	
 }
 @end
