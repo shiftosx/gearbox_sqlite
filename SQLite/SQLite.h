@@ -40,5 +40,6 @@
 }
 
 - (IBAction) selectFile:(id)sender;
+- (void) postNotification:(NSString *)notification withInfo:(NSDictionary *)info;
 
 @end

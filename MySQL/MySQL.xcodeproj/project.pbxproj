@@ -433,7 +433,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CONFIGURATION_BUILD_DIR = /Users/jonathan/Development/shift/Plugins;
+				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/../../shift/PlugIns/";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

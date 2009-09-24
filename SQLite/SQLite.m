@@ -106,6 +106,11 @@
     }
 }
 
+- (void) postNotification:(NSString *)notification withInfo:(NSDictionary *)info
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:notification object:self userInfo:info];
+}
+
 //database querying functions
 - (void) selectSchema:(NSString *)schema
 {
@@ -119,9 +124,17 @@
 - (NSArray *) listTables:(NSString *)filter
 {
 	NSMutableArray *tables = [NSMutableArray array];
-	NSArray *tableArray = [self query:@"SELECT `name` FROM SQLITE_MASTER WHERE `type`='table';"];
-	for (NSDictionary *table in tableArray){
-		[tables addObject:[table objectForKey:@"name"]];
+	NSArray *tableArray;
+	@try {
+		tableArray = [self query:@"SELECT `name` FROM SQLITE_MASTER WHERE `type`='table';"];
+		for (NSDictionary *table in tableArray){
+			[tables addObject:[table objectForKey:@"name"]];
+		}
+	}
+	@catch (NSException * e) {
+		NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[e reason], @"reason",
+																		[[e userInfo] objectForKey:@"query"], @"query", nil];
+		[self postNotification:GBInvalidQuery withInfo:info];
 	}
 	
 	return [NSArray arrayWithArray:tables];
