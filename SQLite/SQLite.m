@@ -123,13 +123,9 @@
 
 - (NSArray *) listTables:(NSString *)filter
 {
-	NSMutableArray *tables = [NSMutableArray array];
-	NSArray *tableArray;
+	NSArray *tables;
 	@try {
-		tableArray = [self query:@"SELECT `name` FROM SQLITE_MASTER WHERE `type`='table';"];
-		for (NSDictionary *table in tableArray){
-			[tables addObject:[table objectForKey:@"name"]];
-		}
+		tables = [[self query:@"SELECT `name` FROM SQLITE_MASTER WHERE `type`='table';"] valueForKey:@"name"];
 	}
 	@catch (NSException * e) {
 		NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[e reason], @"reason",
@@ -137,7 +133,7 @@
 		[self postNotification:GBInvalidQuery withInfo:info];
 	}
 	
-	return [NSArray arrayWithArray:tables];
+	return tables;
 }
 
 - (NSArray *) query:(NSString *)query
