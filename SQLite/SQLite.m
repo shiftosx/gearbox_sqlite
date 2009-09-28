@@ -120,7 +120,12 @@
 {
 	NSArray *array;
 	@try {
-		NSString *query = [NSString stringWithFormat:@"SELECT `name` FROM SQLITE_MASTER WHERE `type`='%@' AND `name` LIKE '%%%@%%';", field, filter];
+		if (filter != nil && [filter length] > 0)
+			filter = [NSString stringWithFormat:@"AND `name` LIKE %%%@%%", filter];
+		else
+			filter = @"";
+
+		NSString *query = [NSString stringWithFormat:@"SELECT `name` FROM SQLITE_MASTER WHERE `type`='%@' %@;", field, filter];
 		array = [[self query:query] valueForKey:@"name"];
 	}
 	@catch (NSException * e) {

@@ -133,9 +133,14 @@
 {
 	if (!connected)
 		return [NSArray array];
+	
+	
+	const char *mysqlFilter = NULL;
+	
+	if (filter != nil && [filter length] > 0)
+		mysqlFilter = [[NSString stringWithFormat:@"%%%@%%", filter] UTF8String];
 
-
-	MYSQL_RES *result = mysql_list_dbs(&connection, [[NSString stringWithFormat:@"%%%@%%", filter] UTF8String]);
+	MYSQL_RES *result = mysql_list_dbs(&connection, mysqlFilter);
 	NSArray *schemas = [self stringArrayFromResult:result];
 	
 	mysql_free_result(result);
@@ -148,8 +153,12 @@
 	if (!connected)
 		return [NSArray array];
 	
+	const char *mysqlFilter = NULL;
 	
-	MYSQL_RES *result = mysql_list_tables(&connection, [[NSString stringWithFormat:@"%%%@%%", filter] UTF8String]);
+	if (filter != nil && [filter length] > 0)
+		mysqlFilter = [[NSString stringWithFormat:@"%%%@%%", filter] UTF8String];	
+	
+	MYSQL_RES *result = mysql_list_tables(&connection, mysqlFilter);
 	NSArray *tables = [self stringArrayFromResult:result];
 
 	mysql_free_result(result);
