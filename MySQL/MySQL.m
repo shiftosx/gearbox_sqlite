@@ -83,12 +83,19 @@
 	return [[NSView alloc] init];
 }
 
+- (NSArray *) gbFeatures
+{
+	return [NSArray arrayWithObjects:GBFeatureTable, GBFeatureView, GBFeatureStoredProc, GBFeatureFunction, GBFeatureTrigger, nil];
+}
+
+
+
+//connection functions
 - (BOOL) isConnected
 {
 	return connected;
 }
 
-//connection functions
 - (BOOL) connect:(NSDictionary *)favorite
 {	
 	mysql_init(&connection);
@@ -128,7 +135,7 @@
 		return [NSArray array];
 
 
-	MYSQL_RES *result = mysql_list_dbs(&connection, [filter UTF8String]);
+	MYSQL_RES *result = mysql_list_dbs(&connection, [[NSString stringWithFormat:@"%%%@%%", filter] UTF8String]);
 	NSArray *schemas = [self stringArrayFromResult:result];
 	
 	mysql_free_result(result);
@@ -142,13 +149,35 @@
 		return [NSArray array];
 	
 	
-	MYSQL_RES *result = mysql_list_tables(&connection, [filter UTF8String]);
+	MYSQL_RES *result = mysql_list_tables(&connection, [[NSString stringWithFormat:@"%%%@%%", filter] UTF8String]);
 	NSArray *tables = [self stringArrayFromResult:result];
 
 	mysql_free_result(result);
 	
 	return tables;
-	
+}
+
+- (NSArray *) listViews:(NSString *)filter
+{
+	return nil;
+}
+
+- (NSArray *) listStoredProcs:(NSString *)filter
+{
+	//SELECT routine_name FROM information_schema.routines WHERE routine_schema LIKE 'testspp' AND routine_type = ''; 
+	return nil;
+}
+
+- (NSArray *) listFunctions:(NSString *)filter
+{
+	//SELECT routine_name FROM information_schema.routines WHERE routine_schema LIKE 'testspp' AND routine_type = ''; 
+	return nil;
+}
+
+- (NSArray *) listTriggers:(NSString *)filter
+{
+	//SELECT trigger_name FROM information_schema.triggers WHERE routine_schema LIKE 'testspp'; 
+	return nil;
 }
 
 - (NSArray *) query:(NSString *)query
