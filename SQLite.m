@@ -106,9 +106,30 @@
     }
 }
 
+- (NSArray *) gbFeatures
+{
+	return [NSArray arrayWithObjects:GBFeatureTable, GBFeatureView, GBFeatureTrigger, nil];
+}
+
 - (void) postNotification:(NSString *)notification withInfo:(NSDictionary *)info
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:notification object:self userInfo:info];
+}
+
+- (NSArray *)sqliteMasterType:(NSString *)field filter:(NSString *)filter
+{
+	NSArray *array;
+	@try {
+		NSString *query = [NSString stringWithFormat:@"SELECT `name` FROM SQLITE_MASTER WHERE `type`='%@' AND `name` LIKE '%%%@%%';", field, filter];
+		array = [[self query:query] valueForKey:@"name"];
+	}
+	@catch (NSException * e) {
+		NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[e reason], @"reason",
+							  [[e userInfo] objectForKey:@"query"], @"query", nil];
+		[self postNotification:GBInvalidQuery withInfo:info];
+	}
+	
+	return array;	
 }
 
 //database querying functions
@@ -123,18 +144,29 @@
 
 - (NSArray *) listTables:(NSString *)filter
 {
-	NSArray *tables;
-	@try {
-		tables = [[self query:@"SELECT `name` FROM SQLITE_MASTER WHERE `type`='table';"] valueForKey:@"name"];
-	}
-	@catch (NSException * e) {
-		NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[e reason], @"reason",
-																		[[e userInfo] objectForKey:@"query"], @"query", nil];
-		[self postNotification:GBInvalidQuery withInfo:info];
-	}
-	
-	return tables;
+	return [self sqliteMasterType:@"table" filter:filter];
 }
+
+- (NSArray *) listViews:(NSString *)filter
+{
+	return [self sqliteMasterType:@"view" filter:filter];
+}
+
+- (NSArray *) listStoredProcs:(NSString *)filter
+{
+	return nil;
+}
+
+- (NSArray *) listFunctions:(NSString *)filter
+{
+	return nil;
+}
+
+- (NSArray *) listTriggers:(NSString *)filter
+{
+	return [self sqliteMasterType:@"trigger" filter:filter];
+}
+
 
 - (NSArray *) query:(NSString *)query
 {	
