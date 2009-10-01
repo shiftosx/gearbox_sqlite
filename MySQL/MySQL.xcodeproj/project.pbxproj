@@ -150,9 +150,9 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				ABA05A010E450A0800A791E1 /* Gearbox.h */,
 				ABA0534A0E41590E00A791E1 /* MySQL.h */,
 				ABA0534B0E41590E00A791E1 /* MySQL.m */,
-				ABA05A010E450A0800A791E1 /* Gearbox.h */,
 			);
 			name = Classes;
 			sourceTree = "<group>";

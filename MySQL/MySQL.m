@@ -108,8 +108,10 @@
 							[[favorite objectForKey:@"database"] UTF8String],0,NULL,0))
 	{
 		connected = YES;
+		[self postNotification:GBNotificationConnected withInfo:nil];
 	}else {
-		NSLog(@"MySQL: Failed to connected. Error:%s\n", mysql_error(&connection));
+		[self postNotification:GBNotificationConnectionFailed withInfo:nil];
+		NSLog(@"MySQL: Failed to connected. Error:%@\n", [self lastErrorMessage]);
 	}
 
 	return connected;
@@ -156,7 +158,7 @@
 	const char *mysqlFilter = NULL;
 	
 	if (filter != nil && [filter length] > 0)
-		mysqlFilter = [[NSString stringWithFormat:@"%%%@%%", filter] UTF8String];	
+		mysqlFilter = [[NSString stringWithFormat:@"%%%@%%", filter] UTF8String];
 	
 	MYSQL_RES *result = mysql_list_tables(&connection, mysqlFilter);
 	NSArray *tables = [self stringArrayFromResult:result];
