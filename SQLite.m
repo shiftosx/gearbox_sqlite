@@ -111,11 +111,6 @@
 	return [NSArray arrayWithObjects:GBFeatureTable, GBFeatureView, GBFeatureTrigger, nil];
 }
 
-- (void) postNotification:(NSString *)notification withInfo:(NSDictionary *)info
-{
-	[[NSNotificationCenter defaultCenter] postNotificationName:notification object:self userInfo:info];
-}
-
 - (NSArray *)sqliteMasterType:(NSString *)field filter:(NSString *)filter
 {
 	NSArray *array;
@@ -131,7 +126,7 @@
 	@catch (NSException * e) {
 		NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[e reason], @"reason",
 							  [[e userInfo] objectForKey:@"query"], @"query", nil];
-		[self postNotification:GBInvalidQuery withInfo:info];
+		[self postNotification:GBNotificationInvalidQuery withInfo:info];
 	}
 	
 	return array;	
@@ -214,7 +209,7 @@
 		}
 	}else {
 		//exception
-		@throw [NSException exceptionWithName:GBInvalidQuery 
+		@throw [NSException exceptionWithName:GBNotificationInvalidQuery 
 									   reason:[self lastErrorMessage] 
 									 userInfo:[NSDictionary dictionaryWithObject:query forKey:@"query"]];
 	}
@@ -225,7 +220,90 @@
 
 - (NSString *) lastErrorMessage
 {
-	return [NSString stringWithFormat:@"%s",  sqlite3_errmsg(database)];
+	int errCode = sqlite3_errcode(database);
+	NSString *errCodeString;
+	
+	switch (errCode) {
+		case SQLITE_ERROR:
+			errCodeString = @"SQL Error";
+			break;
+		case SQLITE_INTERNAL:
+			errCodeString = @"Internal logic error in SQLite";
+			break;
+		case SQLITE_PERM:
+			errCodeString = @"Access permission denied ";
+			break;
+		case SQLITE_ABORT:
+			errCodeString = @"SQLite Aborted";
+			break;
+		case SQLITE_BUSY:
+			errCodeString = @"The database file is locked";
+			break;
+		case SQLITE_LOCKED:
+			errCodeString = @"A table in the database is locked";
+			break;
+		case SQLITE_NOMEM:
+			errCodeString = @"SQLite ran out of memory";
+			break;
+		case SQLITE_READONLY:
+			errCodeString = @"Attempt to write a readonly database";
+			break;
+		case SQLITE_INTERRUPT:
+			errCodeString = @"SQLite Operation Terminated";
+			break;
+		case SQLITE_IOERR:
+			errCodeString = @"Some kind of disk I/O error occurred";
+			break;
+		case SQLITE_CORRUPT:
+			errCodeString = @"The database disk image is malformed";
+			break;
+		case SQLITE_FULL:
+			errCodeString = @"Insertion failed because database is full";
+			break;
+		case SQLITE_CANTOPEN:
+			errCodeString = @"Unable to open the database file";
+			break;
+		case SQLITE_EMPTY:
+			errCodeString = @"Database is empty";
+			break;
+		case SQLITE_SCHEMA:
+			errCodeString = @"The database schema changed";
+			break;
+		case SQLITE_TOOBIG:
+			errCodeString = @"String or BLOB exceeds size limit";
+			break;
+		case SQLITE_CONSTRAINT:
+			errCodeString = @"Abort due to constraint violation";
+			break;
+		case SQLITE_MISMATCH:
+			errCodeString = @"Data type mismatch";
+			break;
+		case SQLITE_MISUSE:
+			errCodeString = @"Library used incorrectly";
+			break;
+		case SQLITE_NOLFS:
+			errCodeString = @"Uses OS features not supported on host";
+			break;
+		case SQLITE_AUTH:
+			errCodeString = @"Authorization denied";
+			break;
+		case SQLITE_FORMAT:
+			errCodeString = @"Auxiliary database format error";
+			break;
+		case SQLITE_RANGE:
+			errCodeString = @"2nd parameter to sqlite3_bind out of range";
+			break;
+		case SQLITE_NOTADB:
+			errCodeString = @"File opened that is not a database file";
+			break;
+		case SQLITE_ROW:
+			errCodeString = @"sqlite3_step() has another row ready";
+			break;
+		case SQLITE_DONE:
+			errCodeString = @"sqlite3_step() has finished executing";
+		break;
+	}
+	return [NSString stringWithFormat:@"%@: %s",  errCodeString, sqlite3_errmsg(database)];
 }
 
 //connection functions
@@ -238,6 +316,11 @@
 {
 	favorite = userFavorite;
 	connected = (sqlite3_open([[favorite objectForKey:@"file"] UTF8String], &database) == SQLITE_OK);
+	if (connected)
+		[self postNotification:GBNotificationConnected withInfo:nil];
+	else
+		[self postNotification:GBNotificationConnectionFailed withInfo:nil];
+
 	return connected;
 }
 
