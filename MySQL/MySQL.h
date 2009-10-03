@@ -19,8 +19,6 @@
 #import "Gearbox.h"
 #import "mysql/include/mysql.h"
 
-@protocol ShiftDbo;
-
 @interface MySQL : NSObject <Gearbox>{
 	IBOutlet NSView *editor;
 

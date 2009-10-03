@@ -19,6 +19,8 @@
 
 @implementation MySQL
 
+@synthesize gbConnection;
+
 + (NSString *) gbTitle{
 	return @"MySQL";
 }
@@ -108,6 +110,7 @@
 							[[favorite objectForKey:@"database"] UTF8String],0,NULL,0))
 	{
 		connected = YES;
+		[self setGbConnection:favorite];
 		[self postNotification:GBNotificationConnected withInfo:nil];
 	}else {
 		[self postNotification:GBNotificationConnectionFailed withInfo:nil];
@@ -121,6 +124,7 @@
 {
 	if (connected)
 		mysql_close(&connection);
+	[self setGbConnection:nil];
 	connected = NO;
 }
 
