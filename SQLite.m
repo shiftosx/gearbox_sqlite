@@ -20,6 +20,8 @@
 
 @implementation SQLite
 
+@synthesize gbConnection;
+
 - (void) dealloc
 {
 	if (filePath)
@@ -316,9 +318,10 @@
 {
 	favorite = userFavorite;
 	connected = (sqlite3_open([[favorite objectForKey:@"file"] UTF8String], &database) == SQLITE_OK);
-	if (connected)
+	if (connected){
+		[self setGbConnection:userFavorite];
 		[self postNotification:GBNotificationConnected withInfo:nil];
-	else
+	}else
 		[self postNotification:GBNotificationConnectionFailed withInfo:nil];
 
 	return connected;
@@ -331,6 +334,7 @@
 //	while( (pStmt = sqlite3_next_stmt(database, 0))!=0 ){
 //		sqlite3_finalize(pStmt);
 //	}
+	[self setGbConnection:nil];
 	sqlite3_close(database);
 	connected = NO;
 }

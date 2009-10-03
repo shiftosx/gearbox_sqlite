@@ -19,8 +19,6 @@
 #import "Gearbox.h"
 #import <sqlite3.h>
 
-@protocol ShiftDbo;
-
 @interface SQLite : NSObject <Gearbox>{
 	IBOutlet NSView *editor;
 	
