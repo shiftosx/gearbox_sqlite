@@ -16,164 +16,54 @@
  */
 
 #import "SQLite.h"
+#import "SQLiteConnection.h"
+#import "SQLiteEditor.h"
+#import "SQLiteSchema.h"
 
 
 @implementation SQLite
 
-@synthesize gbConnection;
-
-- (void) dealloc
-{
-	if (filePath)
-		[filePath release];
-	[super dealloc];
-}
-
-
-+ (NSString *) gbTitle{
++ (NSString *) type{
 	return @"SQLite";
 }
 
-+ (NSImage *) gbIcon{
-	return [NSImage imageNamed:@""];
++ (NSImage *) icon{
+	return nil;
 }
 
-- (NSView *) gbEditor{
+- (NSBundle *)bundle
+{
+	return [NSBundle bundleWithIdentifier:@"com.shiftosx.SQLite"];
+}
+
+- (GBEditor *)editor
+{
+	if (editor == nil)
+		editor = [[SQLiteEditor alloc] initWithServer:self];
 	return editor;
 }
 
-- (void) gbLoadFavoriteIntoEditor:(NSDictionary *)userFavorite
+- (id)createConnection:(NSDictionary *)dictionary
 {
-	filePath = ([userFavorite objectForKey:@"file"]) ? [userFavorite objectForKey:@"file"] : @"";
-	[filePath retain];
-	NSString *nameString = ([userFavorite objectForKey:@"name"]) ? [userFavorite objectForKey:@"name"] : @""; 
-	NSString *fileString = [filePath lastPathComponent];
-
-	[name setObjectValue:nameString];
-	[file setObjectValue:fileString];
+	return [[SQLiteConnection alloc] initWithDictionary:dictionary];
 }
 
-- (NSDictionary *) gbEditorAsDictionary
-{
-	NSMutableDictionary *userFavorite = [[NSMutableDictionary alloc] init];
-	
-	// Validate requirements
-	// Would be nice to add in a check for valid connection and pop up a notice if it fails, a'la apple mail
-	[fileWarning setHidden:![[file stringValue] isEqualToString:@""]];
-	
-	if ([[file stringValue] isEqualToString:@""]){
-		return nil;
-	}
-	[userFavorite setObject:[name stringValue] forKey:@"name"];
-	[userFavorite setObject:filePath forKey:@"file"];	
-	
-	return userFavorite;
-}
-
-- (NSView *) gbAdvanced
-{
-	return [[NSView alloc] init];
-}
-
-- (IBAction) selectFile:(id)sender
-{
-	int result;
-    NSOpenPanel *filePanel = [NSOpenPanel openPanel];
-//	NSSavePanel *filePanel = [NSSavePanel savePanel];
-
-	
-//	NSMutableArray*      topLevelObjs = [NSMutableArray array];
-//	NSDictionary*        nameTable = [NSDictionary dictionaryWithObjectsAndKeys:
-//									  self, NSNibOwner,
-//									  topLevelObjs, NSNibTopLevelObjects,
-//									  nil];
-//	[[NSBundle bundleForClass:[self class]] loadNibFile:@"Editor" externalNameTable:nameTable withZone:nil];
-//	[topLevelObjs makeObjectsPerformSelector:@selector(release)];
-//	
-//	
-//	[savePanel setAccessoryView:saveAccessory];
-	[filePanel setPrompt:@"Choose"];
-	[filePanel setTitle:@"Choose Database"];
-	[filePanel setNameFieldLabel:@"Database"];
-	[filePanel setDelegate:self];
-	
-	[filePanel setAllowedFileTypes:[NSArray arrayWithObjects:@"sqlite",@"sqlite3",@"db",nil]];
-//	[filePanel setAllowsOtherFileTypes:YES];
-	[filePanel setExtensionHidden:NO];
-	[filePanel setResolvesAliases:NO];
-    result = [filePanel runModal];
-    if (result == NSOKButton) {
-		filePath = [[[filePanel URL] path] retain];
-		[file setStringValue:[filePath lastPathComponent]];
-    }
-}
-
-- (NSArray *) gbFeatures
-{
-	return [NSArray arrayWithObjects:GBFeatureTable, GBFeatureView, GBFeatureTrigger, nil];
-}
-
-- (NSArray *)sqliteMasterType:(NSString *)field filter:(NSString *)filter
-{
-	NSArray *array;
-	@try {
-		if (filter != nil && [filter length] > 0)
-			filter = [NSString stringWithFormat:@"AND `name` LIKE %%%@%%", filter];
-		else
-			filter = @"";
-
-		NSString *query = [NSString stringWithFormat:@"SELECT `name` FROM SQLITE_MASTER WHERE `type`='%@' %@;", field, filter];
-		array = [[self query:query] valueForKey:@"name"];
-	}
-	@catch (NSException * e) {
-		NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[e reason], @"reason",
-							  [[e userInfo] objectForKey:@"query"], @"query", nil];
-		[self postNotification:GBNotificationInvalidQuery withInfo:info];
-	}
-	
-	return array;	
-}
 
 //database querying functions
-- (void) selectSchema:(NSString *)schema
+- (void) selectSchema:(GBSchema *)schema
 {
 }
 
 - (NSArray *) listSchemas:(NSString *)filter
 {
-	return [NSArray arrayWithObject:[[favorite objectForKey:@"file"] lastPathComponent]];
+	SQLiteSchema *schema = [[SQLiteSchema alloc] initWithServer:self];
+	return [NSArray arrayWithObject:schema];
 }
 
-- (NSArray *) listTables:(NSString *)filter
-{
-	return [self sqliteMasterType:@"table" filter:filter];
-}
-
-- (NSArray *) listViews:(NSString *)filter
-{
-	return [self sqliteMasterType:@"view" filter:filter];
-}
-
-- (NSArray *) listStoredProcs:(NSString *)filter
-{
-	return nil;
-}
-
-- (NSArray *) listFunctions:(NSString *)filter
-{
-	return nil;
-}
-
-- (NSArray *) listTriggers:(NSString *)filter
-{
-	return [self sqliteMasterType:@"trigger" filter:filter];
-}
-
-
-- (NSArray *) query:(NSString *)query
+- (GBResultSet *) query:(NSString *)query
 {	
-	if (!connected) {
-		return [NSArray array];
+	if (!self.connected) {
+		return nil;
 	}
 	
 	NSMutableArray *results = [NSMutableArray array];
@@ -207,7 +97,7 @@
 				}
 				[row setObject:value forKey:[NSString stringWithUTF8String:sqlite3_column_name(statement, i)]];
 			}
-			[results addObject:row];
+			[results addObject:[GBResult resultWithDictionary:row]];
 		}
 	}else {
 		//exception
@@ -217,7 +107,7 @@
 	}
 
 	sqlite3_finalize(statement); //release statement
-	return [NSArray arrayWithArray:results];
+	return [GBResultSet resultSetWithArray:results];
 }
 
 - (NSString *) lastErrorMessage
@@ -308,23 +198,14 @@
 	return [NSString stringWithFormat:@"%@: %s",  errCodeString, sqlite3_errmsg(database)];
 }
 
-//connection functions
-- (BOOL) isConnected
+- (void)connect:(SQLiteConnection *)aConnection
 {
-	return connected;
-}
-
-- (BOOL) connect:(NSDictionary *)userFavorite
-{
-	favorite = userFavorite;
-	connected = (sqlite3_open([[favorite objectForKey:@"file"] UTF8String], &database) == SQLITE_OK);
+	connected = (sqlite3_open([aConnection.file UTF8String], &database) == SQLITE_OK);
 	if (connected){
-		[self setGbConnection:userFavorite];
+		[super connect:aConnection];
 		[self postNotification:GBNotificationConnected withInfo:nil];
 	}else
 		[self postNotification:GBNotificationConnectionFailed withInfo:nil];
-
-	return connected;
 }
 
 - (void) disconnect
@@ -334,9 +215,8 @@
 //	while( (pStmt = sqlite3_next_stmt(database, 0))!=0 ){
 //		sqlite3_finalize(pStmt);
 //	}
-	[self setGbConnection:nil];
 	sqlite3_close(database);
-	connected = NO;
+	[super disconnect];
 }
 
 @end

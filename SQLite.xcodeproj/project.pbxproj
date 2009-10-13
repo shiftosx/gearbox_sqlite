@@ -11,7 +11,11 @@
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		AB2397F90E65B39A004E224F /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = AB2397F80E65B39A004E224F /* libsqlite3.0.dylib */; };
 		AB23983C0E6644E9004E224F /* Editor.xib in Resources */ = {isa = PBXBuildFile; fileRef = AB23983B0E6644E9004E224F /* Editor.xib */; };
+		AB8689D4107D3C4700783CA2 /* SQLiteEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = AB8689D3107D3C4700783CA2 /* SQLiteEditor.m */; };
+		AB8689D7107D3C9500783CA2 /* SQLiteConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = AB8689D6107D3C9500783CA2 /* SQLiteConnection.m */; };
+		AB8689E8107D586D00783CA2 /* SQLiteSchema.m in Sources */ = {isa = PBXBuildFile; fileRef = AB8689E7107D586D00783CA2 /* SQLiteSchema.m */; };
 		ABA056820E42626B00A791E1 /* SQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = ABA056810E42626B00A791E1 /* SQLite.m */; };
+		ABE2AD03107BC9DE004F2E4A /* ShiftGearbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABE2AD02107BC9DE004F2E4A /* ShiftGearbox.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,10 +27,16 @@
 		8D5B49B6048680CD000E48DA /* SQLite.gearbox */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SQLite.gearbox; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB2397F80E65B39A004E224F /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = /usr/lib/libsqlite3.0.dylib; sourceTree = "<absolute>"; };
-		AB86B1770E47CDC5003CB3AD /* Gearbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gearbox.h; sourceTree = "<group>"; };
-		ABA056800E42626B00A791E1 /* SQLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLite.h; sourceTree = "<group>"; };
-		ABA056810E42626B00A791E1 /* SQLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLite.m; sourceTree = "<group>"; };
+		AB8689D2107D3C4700783CA2 /* SQLiteEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SQLiteEditor.h; path = Source/SQLiteEditor.h; sourceTree = "<group>"; };
+		AB8689D3107D3C4700783CA2 /* SQLiteEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SQLiteEditor.m; path = Source/SQLiteEditor.m; sourceTree = "<group>"; };
+		AB8689D5107D3C9500783CA2 /* SQLiteConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SQLiteConnection.h; path = Source/SQLiteConnection.h; sourceTree = "<group>"; };
+		AB8689D6107D3C9500783CA2 /* SQLiteConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SQLiteConnection.m; path = Source/SQLiteConnection.m; sourceTree = "<group>"; };
+		AB8689E6107D586D00783CA2 /* SQLiteSchema.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SQLiteSchema.h; path = Source/SQLiteSchema.h; sourceTree = "<group>"; };
+		AB8689E7107D586D00783CA2 /* SQLiteSchema.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SQLiteSchema.m; path = Source/SQLiteSchema.m; sourceTree = "<group>"; };
+		ABA056800E42626B00A791E1 /* SQLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SQLite.h; path = Source/SQLite.h; sourceTree = "<group>"; };
+		ABA056810E42626B00A791E1 /* SQLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SQLite.m; path = Source/SQLite.m; sourceTree = "<group>"; };
 		ABA056890E4262FC00A791E1 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/Editor.xib; sourceTree = "<group>"; };
+		ABE2AD02107BC9DE004F2E4A /* ShiftGearbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ShiftGearbox.framework; path = Frameworks/ShiftGearbox.framework; sourceTree = "<group>"; };
 		D2F7E65807B2D6F200F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
@@ -37,6 +47,7 @@
 			files = (
 				8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */,
 				AB2397F90E65B39A004E224F /* libsqlite3.0.dylib in Frameworks */,
+				ABE2AD03107BC9DE004F2E4A /* ShiftGearbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,9 +88,14 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				AB86B1770E47CDC5003CB3AD /* Gearbox.h */,
 				ABA056800E42626B00A791E1 /* SQLite.h */,
 				ABA056810E42626B00A791E1 /* SQLite.m */,
+				AB8689D2107D3C4700783CA2 /* SQLiteEditor.h */,
+				AB8689D3107D3C4700783CA2 /* SQLiteEditor.m */,
+				AB8689D5107D3C9500783CA2 /* SQLiteConnection.h */,
+				AB8689D6107D3C9500783CA2 /* SQLiteConnection.m */,
+				AB8689E6107D586D00783CA2 /* SQLiteSchema.h */,
+				AB8689E7107D586D00783CA2 /* SQLiteSchema.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -87,6 +103,7 @@
 		1058C7ACFEA557BF11CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				ABE2AD02107BC9DE004F2E4A /* ShiftGearbox.framework */,
 				AB2397F80E65B39A004E224F /* libsqlite3.0.dylib */,
 				1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */,
 			);
@@ -175,6 +192,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABA056820E42626B00A791E1 /* SQLite.m in Sources */,
+				AB8689D4107D3C4700783CA2 /* SQLiteEditor.m in Sources */,
+				AB8689D7107D3C9500783CA2 /* SQLiteConnection.m in Sources */,
+				AB8689E8107D586D00783CA2 /* SQLiteSchema.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -208,6 +228,10 @@
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/../shift/PlugIns/";
 				COPYING_PRESERVES_HFS_DATA = YES;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Frameworks\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
@@ -228,6 +252,10 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Frameworks\"",
+				);
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SQLite_Prefix.pch;

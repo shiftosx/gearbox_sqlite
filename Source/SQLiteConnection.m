@@ -15,29 +15,22 @@
  * or see <http://www.gnu.org/licenses/>.
  */
 
-#import <Cocoa/Cocoa.h>
-#import "Gearbox.h"
-#import <sqlite3.h>
+#import "SQLiteConnection.h"
+#import "SQLite.h"
 
-@interface SQLite : NSObject <Gearbox>{
-	IBOutlet NSView *editor;
-	
-	IBOutlet NSTextField *name;
-	IBOutlet NSTextField *file;
-	NSString *filePath;
 
-	IBOutlet NSImageView *nameWarning;
-	IBOutlet NSImageView *fileWarning;
-	
-	IBOutlet NSView *saveAccessory;
-	
-@protected
-	sqlite3 *database;
-	BOOL connected;
-	NSDictionary *favorite;
+@implementation SQLiteConnection
+
+@synthesize file;
+
+- (NSString *)type
+{
+	return [SQLite type];
 }
 
-- (IBAction) selectFile:(id)sender;
-- (NSArray *)sqliteMasterType:(NSString *)field filter:(NSString *)filter;
+- (NSArray *)gbKeys
+{
+	return [NSArray arrayWithObject:@"file"];
+}
 
 @end
