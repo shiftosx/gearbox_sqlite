@@ -92,7 +92,7 @@
 					}
 					case SQLITE_NULL:
 					default:
-						value = nil;
+						value = [NSNull null];
 						break;
 				}
 				[row setObject:value forKey:[NSString stringWithUTF8String:sqlite3_column_name(statement, i)]];
